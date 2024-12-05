@@ -17,6 +17,9 @@ let config = {
     }
 };
 
+let score = 0;
+let scoreText;
+
 let game = new Phaser.Game(config);// <-- We load game config.
 
 // We load assets.
@@ -84,6 +87,8 @@ function create(){
 
     this.physics.add.collider(stars, platforms); // We create coalition betwen stars and platforms.
     this.physics.add.overlap(player, stars, collectStar, null, true); // We use collectStar function to disable the star when making contact.
+
+    scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
 }
 
 // We give interactivity to our game.
@@ -104,7 +109,10 @@ function update(){
     }
 }
 
-// We create a function to disable stars when dude make contact.
+// We create a function to disable stars when dude make contact and added points to score.
 function collectStar(player, star){
     star.disableBody(true, true);
+
+    score += 10;
+    scoreText.setText('Score '+ score);
 }
