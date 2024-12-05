@@ -1,3 +1,4 @@
+// Initial game settings.
 let config = {
     type: Phaser.AUTO,
     width: 800,
@@ -5,7 +6,7 @@ let config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: {y: 300 },
+            gravity: { y: 300 },
             debug: false
         }
     },
@@ -16,9 +17,9 @@ let config = {
     }
 };
 
+let game = new Phaser.Game(config);// <-- We load game config.
 
-let game = new Phaser.Game(config);
-
+// We load assets.
 function preload(){
     this.load.image('sky', 'assets/sky.png');
     this.load.image('ground', 'assets/platform.png');
@@ -27,20 +28,23 @@ function preload(){
     this.load.spritesheet('dude', 'assets/dude.png', {frameWidth: 32, frameHeight: 48});
 }
 
+// We create our scene with assets.
 function create(){
-    this.add.image(400, 300, 'sky');
+    this.add.image(400, 300, 'sky'); // <-- We create sky image as background.
 
+    // We create the platforms with our asset called ground.
     platforms = this.physics.add.staticGroup();
     platforms.create(400, 568, 'ground').setScale(2).refreshBody();
     platforms.create(600, 400, 'ground');
     platforms.create(50, 250, 'ground');
     platforms.create(750, 220, 'ground');
 
+    // We create our player with our asset called dude.
     player = this.physics.add.sprite(100, 450, 'dude');
-
     player.setCollideWorldBounds(true);
     player.setBounce(0.2);
 
+    // We create the animations for dude (our player).
     this.anims.create({
         key: 'left',
         frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
@@ -60,13 +64,29 @@ function create(){
         frameRate: 10,
         repeat: -1
     });
+
     // player.body.setGravityY(300);
 
-    this.physics.add.collider(player, platforms);
+    this.physics.add.collider(player, platforms); // <-- we create  coalition betwen player and platforms.
 
-    cursors = this.input.keyboard.createCursorKeys();
+    cursors = this.input.keyboard.createCursorKeys(); // <-- use method for detect pressed keys.
+
+    // We create collectables stars.
+    stars = this.physics.add.group({
+        key: 'star',
+        repeat: 11,
+        setXY: {x: 12, y: 0, stepX: 70 }
+    });
+    // We add rebound to the stars.
+    stars.children.iterate(function(child){
+        child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+    });
+
+    this.physics.add.collider(stars, platforms); // We create coalition betwen stars and platforms.
+    this.physics.add.overlap(player, stars, collectStar, null, true); // We use collectStar function to disable the star when making contact.
 }
 
+// We give interactivity to our game.
 function update(){
     if(cursors.left.isDown){
         player.setVelocityX(-160);
@@ -82,4 +102,9 @@ function update(){
     if(cursors.up.isDown && player.body.touching.down){
         player.setVelocityY(-330);
     }
+}
+
+// We create a function to disable stars when dude make contact.
+function collectStar(player, star){
+    star.disableBody(true, true);
 }
